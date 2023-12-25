@@ -18,6 +18,7 @@ wsServer.on('connection', function(ws) {
   // Generate a unique code for every user
   const userId = uuid();
   console.log(`Recieved a new connection.`)
+  console.log(ws)
 
   // Store the new connection and handle messages
   clients[userId] = ws;
@@ -27,22 +28,14 @@ wsServer.on('connection', function(ws) {
     console.log('received: %s', data);
     for (let key in clients){
       clients[key].send(`${data}`)
-      console.log('sent mess to client')
+      console.log('sent')
     }
+    console.log(clients.length)
   });
-
-  const interval = setInterval(function ping() {
-    clients.forEach(function each(ws) {
-      if (ws.isAlive === false) return ws.terminate();
-  
-      ws.isAlive = false;
-      ws.ping();
-    });
-  }, 30000);
   
   ws.on('close', function close() {
-    clearInterval(interval);
-    console.log(clients.length)
+    ws.close()
+    
   });
 
 });
