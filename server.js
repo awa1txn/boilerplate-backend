@@ -17,14 +17,33 @@ const clients = [];
 wsServer.on('connection', function(ws) {
   // Generate a unique code for every user
   const userId = uuid();
-  console.log(`Recieved a new connection.`);
+  console.log(`Recieved a new connection.`)
+
+  // Store the new connection and handle messages
+  clients[userId] = ws;
+  // console.log(`${userId} connected.`);
 
   ws.on('message', function message(data) {
     console.log('received: %s', data);
+    for (let key in clients){
+      clients[key].send(`${data}`)
+      console.log('sent mess to client')
+    }
   });
 
-  ws.send('something');
-  // Store the new connection and handle messages
-  clients[userId] = ws;
-  console.log(`${userId} connected.`);
+  const interval = setInterval(function ping() {
+    clients.forEach(function each(ws) {
+      if (ws.isAlive === false) return ws.terminate();
+  
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+  
+  ws.on('close', function close() {
+    clearInterval(interval);
+    console.log(clients.length)
+  });
+
 });
+
